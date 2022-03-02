@@ -1,6 +1,11 @@
 import cv2 as cv
 import numpy as np
 import base64
+from imageio import imread
+import io
+from PIL import Image
+
+from django.conf import settings
 
 from .config import POSE_ANALYSIS_MAPPER
 
@@ -31,22 +36,25 @@ def imgkeypoints(pose_name, input_img):
     inHeight = 368
 
     # Specify the paths for the 2 files
-    protoFile = "pose_analyser/pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
-    weightsFile = "pose_analyser/pose/mpi/pose_iter_160000.caffemodel"
+    # protoFile = "pose_analyser/pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
+    # weightsFile = "pose_analyser/pose/mpi/pose_iter_160000.caffemodel"
 
     # Read the network into Memory
-    net = cv.dnn.readNetFromCaffe(protoFile, weightsFile)
-
+    # net = cv.dnn.readNetFromCaffe(protoFile, weightsFile)
+    net = settings.NETWORK
     # ## reading network stored in tensorflow format
     # net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
 
     # capture video using webcam is input argument is not present
     # cap = cv.VideoCapture(input_img if input_img != ' ' else 0)
-    im_bytes = base64.b64decode(input_img)
-    im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
-    cap = cv.imdecode(im_arr, flags=cv.IMREAD_COLOR)
 
-    frame = cap
+    elem = base64.urlsafe_b64decode(input_img)
+
+    # convert byte to numpy array for cv2
+    img_color = cv.cvtColor(np.array(Image.open(io.BytesIO(elem))), cv.COLOR_BGR2RGB)
+
+    frame = img_color
+    # cv.imwrite('upload.jpg', frame)
     frameWidth = frame.shape[1]
     frameHeight = frame.shape[0]
     net.setInput(cv.dnn.blobFromImage(frame, 1.0 / 255, (inWidth, inHeight), (0, 0, 0), swapRB=False, crop=False))
@@ -90,7 +98,7 @@ def imgkeypoints(pose_name, input_img):
     freq = cv.getTickFrequency() / 1000
     cv.putText(frame, '%.2fms' % (t / freq), (10, 20), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
     frame = cv.resize(frame, (960, 800))
-    cv.imwrite('upload.jpg', frame)
+    # cv.imwrite('output.jpg', frame)
     # cv.imshow('OpenPose using OpenCV', frame)
     _, im_arr = cv.imencode('.jpg', frame)  # im_arr: image in Numpy one-dim array format.
     im_bytes = im_arr.tobytes()
@@ -99,4 +107,4 @@ def imgkeypoints(pose_name, input_img):
     if pose_name.lower() in POSE_ANALYSIS_MAPPER:
         evaluate = POSE_ANALYSIS_MAPPER.get(pose_name.lower())
         analysis = evaluate(dict(zip(list(BODY_PARTS.keys()), points)))
-        return str(im_b64), analysis
+        return str(im_b64)[2:-1], analysis

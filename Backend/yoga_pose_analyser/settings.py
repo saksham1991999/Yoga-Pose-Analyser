@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 from decouple import config
 import os
 from pathlib import Path
+import cv2
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -202,3 +203,11 @@ CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Model
+# Specify the paths for the 2 files
+PROTO_FILE = "pose_analyser/pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
+WEIGHTS_FILE = "pose_analyser/pose/mpi/pose_iter_160000.caffemodel"
+
+# Read the network into Memory
+NETWORK = cv2.dnn.readNetFromCaffe(PROTO_FILE, WEIGHTS_FILE)

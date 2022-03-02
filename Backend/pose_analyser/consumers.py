@@ -22,12 +22,13 @@ class PoseConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, text_data):
         self.image = text_data.get('image', None)
         if self.image:
-            im_b64, analysis = imgkeypoints(self.pose.name, self.image)
+            self.image = self.image.replace("data:image/png;base64,", "").strip()
+            im_b64, analysis = imgkeypoints(self.pose.name, str(self.image))
             data = {
                 'image': im_b64,
                 'analysis': analysis
             }
-            print(analysis)
+            # print(analysis)
             # print(self.image)
             await self.send_json(data)
 

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+
+{% block extra_stylesheet %}
+
+{% endblock extra_stylesheet %}
+
+
+
+{% block content %}
+
+<center>
+<div id="container">
+<video width="200" height="200" autoplay="true" id="video">
+</video>
+</div>
+
+    <h2>WebSocket Test</h2>
+   <div id = "output"></div>
+
+<canvas id="canvas" style="overflow:auto"></canvas>
+<br></br>
+<p> Image Converted to String: </p>
+<p id="printresult"></p>
+</center>
+
+{% endblock content %}
+
+
+
+
+{% block extra_scripts %}
+<script>
+
+var video = document.querySelector("#video");
+
+
+
+if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+        })
+        .catch(function (err0r) {
+          console.log("Something went wrong!");
+        });
+ }
+ var resultb64="";
+
+function everyTime() {
+	capture();
+}
+
+var myInterval = setInterval(everyTime, 100);
+
+function capture() {
+    var canvas = document.getElementById('canvas');
+    var video = document.getElementById('video');
+    canvas.width = 200;
+    canvas.height = 200;
+    canvas.getContext('2d').drawImage(video, 0, 0, 200,200);
+    var resultb64 = canvas.toDataURL();
+    document.getElementById("printresult").innerHTML = resultb64;
+ }
+
+
+var wsUri = "ws://echo.websocket.org/";
+
+
+         output = document.getElementById("output");
+         testWebSocket();
+
+
+function testWebSocket() {
+         websocket = new WebSocket(wsUri);
+
+         websocket.onopen = function(evt) {
+            onOpen(evt)
+         };
+
+         websocket.onmessage = function(evt) {
+            onMessage(evt)
+         };
+
+         websocket.onerror = function(evt) {
+            onError(evt)
+         };
+      }
+
+function onOpen(evt) {
+         writeToScreen("CONNECTED");
+         doSend("WebSocket rocks");
+      }
+
+      function onMessage(evt) {
+         writeToScreen('<span style = "color: blue;">RESPONSE: ' +
+            evt.data+'</span>'); websocket.close();
+      }
+
+      function onError(evt) {
+         writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+      }
+
+      function doSend(message) {
+         writeToScreen("SENT: " + message); websocket.send(message);
+      }
+
+      function writeToScreen(message) {
+         var pre = document.createElement("p");
+         pre.style.wordWrap = "break-word";
+         pre.innerHTML = message; output.appendChild(pre);
+      }
+
+</script>
+{% endblock extra_scripts %}

@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     "nested_admin",
     'drf_yasg',
+    'widget_tweaks',
+    'channels',
 
     'accounts',
     'core',
@@ -73,7 +75,7 @@ ROOT_URLCONF = 'yoga_pose_analyser.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,6 +89,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'yoga_pose_analyser.wsgi.application'
+ASGI_APPLICATION = 'yoga_pose_analyser.asgi.application'
 
 
 # Database
@@ -124,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 

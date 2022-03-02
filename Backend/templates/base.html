@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    {% block extra_stylesheet %}
+    {% endblock extra_stylesheet %}
+</head>
+<body>
+
+    {% include "navbar.html" %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{{ message.tags }}">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong></strong> {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock content %}
+
+    {% block extra_body %}
+    {% endblock extra_body %}
+
+    {% block footer %}
+    {% include "footer.html" %}
+    {% endblock footer %}
+
+
+    {% include "scripts.html" %}
+
+    {% block extra_scripts %}
+    {% endblock extra_scripts %}
+</body>
+</html>

@@ -1,5 +1,6 @@
 import os
 
+from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -33,3 +34,14 @@ class PoseViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def HomeView(request):
+    context = {}
+    return render(request, 'index.html', context)
+
+
+def AnalysisView(request, id):
+    pose = Pose.objects.get(id=id)
+    context = {"pose": pose}
+    return render(request, 'analysis.html', context)

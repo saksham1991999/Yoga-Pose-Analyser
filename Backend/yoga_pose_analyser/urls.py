@@ -41,9 +41,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('social/', include('social.urls')),
 
+    path('api/', include(router.urls)),
+    path('', include('pose_analyser.urls')),
     # path('users/', UserAPIView.as_view())
 ]
-urlpatterns += router.urls
 
 urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)

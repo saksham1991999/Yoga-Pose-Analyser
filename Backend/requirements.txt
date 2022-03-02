@@ -23,3 +23,7 @@ numpy
 django-map-widgets
 django-leaflet
 opencv-python
+django-widget-tweaks
+channels_redis
+channels
+daphne

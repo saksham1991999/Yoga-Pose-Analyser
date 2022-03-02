@@ -3,25 +3,41 @@ import numpy as np
 
 from .config import POSE_ANALYSIS_MAPPER
 
+# BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+#                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+#                "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
+#                "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
 
-BODY_PARTS = {"Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-              "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-              "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-              "LEye": 15, "REar": 16, "LEar": 17, "Background": 18}
+# POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+#                ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+#                ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+#                ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
+#                ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-POSE_PAIRS = [["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-              ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-              ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-              ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-              ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"]]
+BODY_PARTS = { "Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                   "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                   "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14,
+                   "Background": 15 }
+
+POSE_PAIRS = [ ["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
+                   ["RElbow", "RWrist"], ["Neck", "LShoulder"], ["LShoulder", "LElbow"],
+                   ["LElbow", "LWrist"], ["Neck", "Chest"], ["Chest", "RHip"], ["RHip", "RKnee"],
+                   ["RKnee", "RAnkle"], ["Chest", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"] ]
 
 
 def imgkeypoints(pose_name, input_img):
     inWidth = 368
     inHeight = 368
 
-    ## reading network stored in tensorflow format
-    net = cv.dnn.readNetFromTensorflow("pose_analyser/graph_opt.pb")
+    # Specify the paths for the 2 files
+    protoFile = "pose_analyser/pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
+    weightsFile = "pose_analyser/pose/mpi/pose_iter_160000.caffemodel"
+
+    # Read the network into Memory
+    net = cv.dnn.readNetFromCaffe(protoFile, weightsFile)
+
+    # ## reading network stored in tensorflow format
+    # net = cv.dnn.readNetFromTensorflow("graph_opt.pb")
 
     # capture video using webcam is input argument is not present
     cap = cv.VideoCapture(input_img if input_img != ' ' else 0)
@@ -35,12 +51,12 @@ def imgkeypoints(pose_name, input_img):
         frameWidth = frame.shape[1]
         frameHeight = frame.shape[0]
 
-        net.setInput(
-            cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
+        # net.setInput(cv.dnn.blobFromImage(frame, 1.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
+        net.setInput(cv.dnn.blobFromImage(frame, 1.0 / 255, (inWidth, inHeight), (0, 0, 0), swapRB=False, crop=False))
         out = net.forward()
-        out = out[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
+        # out = out[:, :16, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
 
-        assert (len(BODY_PARTS) == out.shape[1])
+        # assert(len(BODY_PARTS) == out.shape[1])
 
         points = []
         for i in range(len(BODY_PARTS)):
